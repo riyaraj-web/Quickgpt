@@ -82,6 +82,3 @@ In the client directory, you can run:
 - `npm run build` - Builds the app for production
 - `npm run preview` - Preview the production build locally
 - `npm run lint` - Run ESLint for code quality
-
- 
-**Made with ❤️ by [Riya Raj](https://github.com/riyaraj-web)**
