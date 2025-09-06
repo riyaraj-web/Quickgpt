@@ -1,4 +1,4 @@
-# Quickgpt
+
 # QuickGPT 🤖
 
 **Intelligent AI Assistant - Ask me anything.**
