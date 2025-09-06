@@ -18,6 +18,8 @@ A modern, responsive web application that provides an intuitive chat interface f
 Check out the live application: **[quickgpt-e65v-git-main-riyas-projects-db0e7c35.vercel.app](https://quickgpt-e65v-git-main-riyas-projects-db0e7c35.vercel.app/)**
 
 ## 📸 Screenshots
+<img width="1828" height="896" alt="{6D5B8307-653F-4B81-A44E-EC23FC1A12FB}" src="https://github.com/user-attachments/assets/f8139382-f0fb-45e5-bfb1-2bdeddbc01bb" />
+
 
 ![QuickGPT Interface](https://via.placeholder.com/800x400/1a1a1a/ffffff?text=QuickGPT+Interface)
 
