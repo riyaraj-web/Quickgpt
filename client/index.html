@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickGPT - Working Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #e8eaf6 0%, #c5cae9 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .logo-section {
+            margin-bottom: 60px;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #7986cb, #5c6bc0);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 8px 32px rgba(121, 134, 203, 0.3);
+            font-size: 32px;
+        }
+
+        .brand-name {
+            font-size: 48px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #5c6bc0, #7986cb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            letter-spacing: -2px;
+        }
+
+        .tagline {
+            font-size: 18px;
+            color: #666;
+            font-weight: 500;
+            opacity: 0.8;
+        }
+
+        .main-heading {
+            font-size: 56px;
+            font-weight: 300;
+            color: #424242;
+            margin-bottom: 40px;
+            letter-spacing: -2px;
+        }
+
+        .input-container {
+            width: 100%;
+            max-width: 600px;
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .chat-input {
+            width: 100%;
+            padding: 18px 24px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            outline: none;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            color: #333;
+        }
+
+        .chat-input:focus {
+            box-shadow: 0 12px 40px rgba(121, 134, 203, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .chat-input::placeholder {
+            color: #a0a0a0;
+        }
+
+        .send-button {
+            position: absolute;
+            right: 6px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #7986cb, #5c6bc0);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 24px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .send-button:hover:not(:disabled) {
+            transform: translateY(-50%) translateY(-2px);
+            box-shadow: 0 8px 20px rgba(121, 134, 203, 0.4);
+        }
+
+        .send-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .chat-area {
+            width: 100%;
+            max-width: 700px;
+            max-height: 400px;
+            overflow-y: auto;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            display: none;
+        }
+
+        .chat-area.active {
+            display: block;
+        }
+
+        .message {
+            margin-bottom: 16px;
+            padding: 12px 16px;
+            border-radius: 16px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .message.user {
+            background: linear-gradient(135deg, #7986cb, #5c6bc0);
+            color: white;
+            margin-left: 60px;
+            text-align: right;
+        }
+
+        .message.ai {
+            background: #f5f5f5;
+            color: #333;
+            margin-right: 60px;
+            text-align: left;
+        }
+
+        .message-content {
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 16px;
+            background: #f5f5f5;
+            border-radius: 16px;
+            margin-right: 60px;
+            margin-bottom: 16px;
+        }
+
+        .typing-indicator.active {
+            display: flex;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #7986cb;
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            max-width: 600px;
+        }
+
+        .suggestion-btn {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(121, 134, 203, 0.3);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .suggestion-btn:hover {
+            background: rgba(121, 134, 203, 0.1);
+            border-color: #7986cb;
+            transform: translateY(-1px);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes typing {
+            0%, 80%, 100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .brand-name {
+                font-size: 36px;
+            }
+            .main-heading {
+                font-size: 42px;
+            }
+            .suggestions {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo-section">
+            <div class="logo">🚀</div>
+            <h1 class="brand-name">QuickGPT</h1>
+            <p class="tagline">Intelligent AI Assistant</p>
+        </div>
+        
+        <h2 class="main-heading">Ask me anything.</h2>
+        
+        <div class="input-container">
+            <input type="text" class="chat-input" placeholder="Type your message..." id="messageInput">
+            <button class="send-button" id="sendButton">Send</button>
+        </div>
+
+        <div class="suggestions">
+            <button class="suggestion-btn" onclick="fillInput('Hello, how can you help me today?')">👋 Say Hello</button>
+            <button class="suggestion-btn" onclick="fillInput('What can you do?')">❓ What can you do</button>
+            <button class="suggestion-btn" onclick="fillInput('Tell me a joke')">😄 Tell me a joke</button>
+            <button class="suggestion-btn" onclick="fillInput('Help me with coding')">💻 Help with coding</button>
+        </div>
+
+        <div class="chat-area" id="chatArea">
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="typing-dots">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+                <span>QuickGPT is thinking...</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM elements
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const chatArea = document.getElementById('chatArea');
+        const typingIndicator = document.getElementById('typingIndicator');
+
+        // State
+        let isProcessing = false;
+
+        // AI responses database
+        const responses = {
+            greetings: [
+                "👋 Hello! I'm QuickGPT, your AI assistant. How can I help you today?",
+                "Hi there! I'm here to help with any questions or tasks you have. What would you like to know?",
+                "Hey! Great to meet you. I'm ready to assist with anything you need!"
+            ],
+            help: [
+                "🚀 I can help you with:\n\n💬 Answering questions\n💻 Coding and programming\n✍️ Writing and content creation\n🧠 Problem solving\n📚 Learning new topics\n🎨 Creative ideas\n\nWhat interests you most?",
+                "I'm designed to assist with a wide range of tasks! I can help with coding, writing, math, creative projects, answering questions, and much more. What would you like to explore?",
+                "My capabilities include:\n• Answering questions on various topics\n• Helping with code and technical problems\n• Writing assistance\n• Creative brainstorming\n• Educational support\n\nWhat can I help you with specifically?"
+            ],
+            jokes: [
+                "😄 Why don't scientists trust atoms?\n\nBecause they make up everything!",
+                "🤖 Why did the AI go to therapy?\n\nIt had too many deep learning issues!",
+                "💻 Why do programmers prefer dark mode?\n\nBecause light attracts bugs!",
+                "🚀 What do you call a programmer from Finland?\n\nNils!"
+            ],
+            coding: [
+                "💻 I'd love to help with coding! What programming language are you working with? I can assist with:\n\n• Debugging code\n• Writing functions\n• Explaining concepts\n• Code optimization\n• Learning new languages\n\nWhat specific coding challenge are you facing?",
+                "🔧 Great! I'm here to help with your coding needs. Whether it's Python, JavaScript, Java, C++, or any other language, I can help with debugging, writing code, or explaining concepts. What are you working on?",
+                "👨‍💻 Awesome! I love helping with programming. I can assist with:\n\n• Writing clean, efficient code\n• Debugging and troubleshooting\n• Code reviews and optimization\n• Learning programming concepts\n• Project architecture\n\nTell me about your project!"
+            ],
+            default: [
+                "That's an interesting question! Let me think about that...",
+                "Great topic! I'd be happy to help you explore this further.",
+                "Thanks for asking! Here's what I think about that...",
+                "Interesting! Let me share some thoughts on this.",
+                "That's a good question. Let me help you with that."
+            ]
+        };
+
+        // Initialize
+        function init() {
+            messageInput.addEventListener('keydown', handleKeyPress);
+            sendButton.addEventListener('click', sendMessage);
+            
+            // Welcome message
+            setTimeout(() => {
+                addMessage('ai', "🚀 Welcome to QuickGPT! I'm your intelligent AI assistant. I'm here to help with questions, coding, writing, and much more. What would you like to explore today?");
+                chatArea.classList.add('active');
+            }, 500);
+        }
+
+        // Handle key press
+        function handleKeyPress(e) {
+            if (e.key === 'Enter' && !isProcessing) {
+                sendMessage();
+            }
+        }
+
+        // Fill input with suggestion
+        function fillInput(text) {
+            messageInput.value = text;
+            messageInput.focus();
+        }
+
+        // Send message
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            
+            if (!message || isProcessing) return;
+            
+            isProcessing = true;
+            sendButton.disabled = true;
+            
+            // Add user message
+            addMessage('user', message);
+            messageInput.value = '';
+            
+            // Show typing indicator
+            showTyping();
+            
+            // Simulate AI processing delay
+            await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1500));
+            
+            // Generate and add AI response
+            const response = generateResponse(message);
+            hideTyping();
+            addMessage('ai', response);
+            
+            isProcessing = false;
+            sendButton.disabled = false;
+            messageInput.focus();
+        }
+
+        // Add message to chat
+        function addMessage(type, content) {
+            chatArea.classList.add('active');
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = content;
+            
+            messageDiv.appendChild(contentDiv);
+            chatArea.insertBefore(messageDiv, typingIndicator);
+            
+            // Scroll to bottom
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        // Show typing indicator
+        function showTyping() {
+            typingIndicator.classList.add('active');
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        // Hide typing indicator
+        function hideTyping() {
+            typingIndicator.classList.remove('active');
+        }
+
+        // Generate AI response
+        function generateResponse(message) {
+            const lowerMessage = message.toLowerCase();
+            
+            // Check for specific patterns
+            if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
+                return getRandomResponse('greetings');
+            }
+            
+            if (lowerMessage.includes('help') || lowerMessage.includes('what can you do') || lowerMessage.includes('capabilities')) {
+                return getRandomResponse('help');
+            }
+            
+            if (lowerMessage.includes('joke') || lowerMessage.includes('funny') || lowerMessage.includes('humor')) {
+                return getRandomResponse('jokes');
+            }
+            
+            if (lowerMessage.includes('code') || lowerMessage.includes('program') || lowerMessage.includes('coding') || lowerMessage.includes('debug')) {
+                return getRandomResponse('coding');
+            }
+            
+            // Math questions
+            if (lowerMessage.includes('what is') && (lowerMessage.includes('+') || lowerMessage.includes('-') || lowerMessage.includes('*') || lowerMessage.includes('/'))) {
+                try {
+                    const mathExpression = message.replace(/what is/i, '').trim();
+                    const result = eval(mathExpression.replace(/x/g, '*'));
+                    return `🔢 ${mathExpression} = ${result}`;
+                } catch (e) {
+                    return "I can help with math! Try asking something like 'What is 15 + 25?' or 'What is 10 * 7?'";
+                }
+            }
+            
+            // Time/Date
+            if (lowerMessage.includes('time') || lowerMessage.includes('date')) {
+                const now = new Date();
+                return `🕐 Current time: ${now.toLocaleTimeString()}\n📅 Date: ${now.toLocaleDateString()}`;
+            }
+            
+            // Weather (mock response)
+            if (lowerMessage.includes('weather')) {
+                const conditions = ['sunny', 'cloudy', 'partly cloudy', 'rainy', 'clear'];
+                const condition = conditions[Math.floor(Math.random() * conditions.length)];
+                const temp = Math.floor(Math.random() * 30) + 10;
+                return `🌤️ I can't check real weather data, but I can imagine it's ${condition} and ${temp}°C where you are! For real weather, try checking your local weather app.`;
+            }
+            
+            // Default responses with context
+            const contextualResponses = [
+                `Interesting question about "${message}". Let me share some thoughts on this topic...`,
+                `"${message}" - that's something I can definitely help with! Here's what I think...`,
+                `Great topic! Regarding "${message}", I'd say...`,
+                `Thanks for asking about "${message}". This is quite fascinating...`
+            ];
+            
+            return contextualResponses[Math.floor(Math.random() * contextualResponses.length)] + 
+                   "\n\n" + getRandomResponse('default');
+        }
+
+        // Get random response from category
+        function getRandomResponse(category) {
+            const categoryResponses = responses[category];
+            return categoryResponses[Math.floor(Math.random() * categoryResponses.length)];
+        }
+
+        // Start the app
+        init();
+    </script>
+</body>
+</html>
